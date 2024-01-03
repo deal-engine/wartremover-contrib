@@ -23,7 +23,7 @@ object NestedFuture extends WartTraverser {
           case t: TermTree if futureSymbols.contains(t.tpe.typeSymbol.fullName) =>
             t.tpe.typeArgs match {
               case Seq(singleArg) if singleArg.typeSymbol.fullName ==  t.tpe.typeSymbol.fullName =>
-                error(u)(tree.pos, message)
+                warning(u)(tree.pos, message)
                 super.traverse(tree)
               case _ => super.traverse(tree)
             }

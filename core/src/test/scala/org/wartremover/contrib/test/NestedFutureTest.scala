@@ -10,17 +10,17 @@ class NestedFutureTest extends AnyFunSuite with ResultAssertions {
   implicit val ec: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.global
 
-  test("single future doesn't error") {
+  test("single future doesn't warn") {
     val result = WartTestTraverser(NestedFuture) {
       val f: Future[Unit] = Future.successful(())
     }
     assertEmpty(result)
   }
 
-  test("error if nested Future[Future[Unit]]") {
+  test("nested Future[Future[Unit]] warns") {
     val result = WartTestTraverser(NestedFuture) {
       val f: Future[Future[Unit]] = Future.successful(Future.successful(()))
     }
-    assertError(result)(NestedFuture.message)
+    assertWarnings(result)(NestedFuture.message, 1)
   }
 }

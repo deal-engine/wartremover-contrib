@@ -9,11 +9,6 @@ object NestedFuture extends WartTraverser {
       |To chain the result of Future to other Future, use flatMap or a for comprehension.
       |""".stripMargin
 
-  private val futureSymbols: Set[String] = Set(
-    "scala.concurrent.Future",
-    "com.twitter.util.Future"
-  )
-
   def apply(u: WartUniverse): u.Traverser = {
     new u.Traverser(this) {
       import q.reflect.*
@@ -22,15 +17,17 @@ object NestedFuture extends WartTraverser {
         tree match {
           case _ if tree.isExpr =>
             tree.asExpr match {
+              case '{ scala.Predef.??? } => super.traverseTree(tree)(owner)
               case '{
                 type a
                 $f: Future[Future[`a`]]
-              } => error(tree.pos, message)
+              } =>
+                warning(tree.pos, message)
+                super.traverseTree(tree)(owner)
               case _ => super.traverseTree(tree)(owner)
             }
           case _ => super.traverseTree(tree)(owner)
         }
-
     }
   }
 }
